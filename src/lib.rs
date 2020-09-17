@@ -138,7 +138,11 @@ impl TTS {
                 Ok(TTS(Box::new(tts)))
             }
             #[cfg(target_os = "macos")]
-            Backends::AppKit => Ok(TTS(Box::new(backends::AppKit::new()))),
+            Backends::AppKit => {
+                use backends::ThreadWrapped;
+                impl ThreadWrapped for backends::AppKit { fn new() -> Self { backends::AppKit::new() } }
+                Ok(TTS(Box::new(<backends::AppKit as ThreadWrapped>::wrap())))
+            },
             #[cfg(any(target_os = "macos", target_os = "ios"))]
             Backends::AvFoundation => {
                 use backends::ThreadWrapped;
