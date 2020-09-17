@@ -1,12 +1,4 @@
 use std::io;
-
-#[cfg(target_os = "macos")]
-use cocoa_foundation::base::id;
-#[cfg(target_os = "macos")]
-use cocoa_foundation::foundation::NSRunLoop;
-#[cfg(target_os = "macos")]
-use objc::{msg_send, sel, sel_impl};
-
 use tts::*;
 
 fn main() -> Result<(), Error> {
@@ -49,13 +41,6 @@ fn main() -> Result<(), Error> {
     }
     tts.speak("Goodbye.", false)?;
     let mut _input = String::new();
-    #[cfg(target_os = "macos")]
-    {
-        let run_loop: id = unsafe { NSRunLoop::currentRunLoop() };
-        unsafe {
-            let _: () = msg_send![run_loop, run];
-        }
-    }
-    io::stdin().read_line(&mut _input)?;
+    io::stdin().read_line(&mut _input).unwrap();
     Ok(())
 }

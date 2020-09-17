@@ -15,6 +15,8 @@ mod appkit;
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 mod av_foundation;
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+mod thread_wrapper;
 
 #[cfg(target_os = "linux")]
 pub use self::speech_dispatcher::*;
@@ -30,3 +32,5 @@ pub use self::appkit::*;
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub use self::av_foundation::*;
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub use self::thread_wrapper::*;

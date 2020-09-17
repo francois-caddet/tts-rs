@@ -21,6 +21,9 @@ use cocoa_foundation::base::id;
 use libc::c_char;
 #[cfg(target_os = "macos")]
 use objc::{class, msg_send, sel, sel_impl};
+#[cfg(target_os = "macos")]
+extern crate serde;
+use ::serde::*;
 use thiserror::Error;
 
 mod backends;
@@ -40,6 +43,7 @@ pub enum Backends {
     AvFoundation,
 }
 
+#[derive(Debug, Serialize,Deserialize)]
 pub struct Features {
     pub stop: bool,
     pub rate: bool,
@@ -60,10 +64,10 @@ impl Default for Features {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error,Serialize,Deserialize)]
 pub enum Error {
-    #[error("IO error: {0}")]
-    IO(#[from] std::io::Error),
+//    #[error("IO error: {0}")]
+//    IO(#[from] std::io::Error),
     #[error("Value not received")]
     NoneError,
     #[cfg(target_arch = "wasm32")]
@@ -136,7 +140,11 @@ impl TTS {
             #[cfg(target_os = "macos")]
             Backends::AppKit => Ok(TTS(Box::new(backends::AppKit::new()))),
             #[cfg(any(target_os = "macos", target_os = "ios"))]
-            Backends::AvFoundation => Ok(TTS(Box::new(backends::AvFoundation::new()))),
+            Backends::AvFoundation => {
+                use backends::ThreadWrapped;
+                impl ThreadWrapped for backends::AvFoundation { fn new() -> Self { backends::AvFoundation::new() } }
+                Ok(TTS(Box::new(<backends::AvFoundation as ThreadWrapped>::wrap())))
+            },
         }
     }
 
